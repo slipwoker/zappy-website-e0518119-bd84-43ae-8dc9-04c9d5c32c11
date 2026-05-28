@@ -1,0 +1,103 @@
+# The Digital Reset — Generative Engine Optimization Map
+
+> A digital products business focused on selling downloadable or online goods. The specific niche, product types, and brand identity are yet to be defined.
+
+---
+
+## Pages
+
+### Home
+https://example.com
+A digital products business focused on selling downloadable or online goods. The specific niche, product types, and brand identity are yet to be defined.
+
+### Features
+https://example.com/features
+Features | The Digital Reset. shopify ecommerce website
+
+### About
+https://example.com/about
+About | The Digital Reset. shopify ecommerce website
+
+### Contact
+https://example.com/contact
+Contact | The Digital Reset. shopify ecommerce website
+
+### Products
+https://example.com/products
+Our Products - The Digital Reset
+
+### Cart
+https://example.com/cart
+Your Cart
+
+### Checkout
+https://example.com/checkout
+Checkout
+
+### Login
+https://example.com/login
+Customer Login
+
+### Account
+https://example.com/account
+My Account
+
+### Order Success
+https://example.com/order-success
+Thank you for your order
+
+### Product Detail
+https://example.com/product/:slug
+Product Details - The Digital Reset
+
+### Category
+https://example.com/category/:slug
+Products - The Digital Reset
+
+## Legal & Policy
+
+### Privacy Policy
+https://example.com/privacy
+Information about how user data is collected, stored, and protected.
+
+### Terms & Conditions
+https://example.com/terms
+Legal terms describing service usage, rights, and policies.
+
+### Accessibility Statement
+https://example.com/accessibility
+Information about WCAG compliance and accessibility features.
+
+---
+
+## Products
+
+_No products are currently configured._
+
+---
+
+# Business Context (for LLM understanding)
+
+## About The Digital Reset
+A digital products business focused on selling downloadable or online goods. The specific niche, product types, and brand identity are yet to be defined.
+
+## Services/Products
+- digital products sales
+
+## Target Audience
+- Digital Nomads
+- Creative Professionals
+- Online Entrepreneurs
+
+## Industry
+E-commerce
+
+---
+
+# Machine-readable feeds
+
+- Sitemap (XML): https://example.com/sitemap.xml
+- Robots: https://example.com/robots.txt
+- Flattened page text (for LLMs): https://example.com/llms-full.txt
+- Products (JSON): https://example.com/products.json
+- Products (Google Merchant RSS): https://example.com/product-feed.xml

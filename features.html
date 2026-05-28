@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <title>Features — The Digital Reset</title>
+    <meta name="description" content="Features | The Digital Reset. shopify ecommerce website">
+    <meta name="keywords" content="Features, shopify ecommerce website, ecommerce fulfillment services, amazon ecommerce platform, shopify ecommerce store">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <!-- Zappy Analytics -->
+<script>
+(function() {
+  'use strict';
+  
+  // Configuration
+  var config = {
+    websiteId: 'e0518119-bd84-43ae-8dc9-04c9d5c32c11',
+    apiUrl: 'https://api.zappy5.com/api/analytics/track',
+    sessionDuration: 30 * 60 * 1000, // 30 minutes
+    visitorDuration: 30 * 24 * 60 * 60 * 1000, // 30 days
+    trackPageViews: true,
+    trackClicks: true,
+    trackFormSubmissions: true
+  };
+  
+  // Generate or retrieve persistent visitor ID (30 days)
+  function getVisitorId() {
+    var visitorKey = 'zappy_visitor_' + config.websiteId;
+    var visitor = null;
+    
+    try {
+      visitor = localStorage.getItem(visitorKey);
+      if (visitor) {
+        var visitorData = JSON.parse(visitor);
+        var now = Date.now();
+        
+        // Check if visitor ID is still valid (30 days)
+        if (now - visitorData.created < config.visitorDuration) {
+          // Update last seen timestamp
+          visitorData.lastSeen = now;
+          localStorage.setItem(visitorKey, JSON.stringify(visitorData));
+          return visitorData.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Zappy Analytics: LocalStorage not available');
+    }
+    
+    // Generate new visitor ID
+    var newVisitorId = 'zv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    try {
+      localStorage.setItem(visitorKey, JSON.stringify({
+        id: newVisitorId,
+        created: Date.now(),
+        lastSeen: Date.now()
+      }));
+    } catch (e) {
+      // Continue without local storage
+    }
+    
+    return newVisitorId;
+  }
+  
+  // Generate or retrieve session ID (30 minutes)
+  function getSessionId() {
+    var sessionKey = 'zappy_session_' + config.websiteId;
+    var session = null;
+    
+    try {
+      session = sessionStorage.getItem(sessionKey);
+      if (session) {
+        var sessionData = JSON.parse(session);
+        var now = Date.now();
+        
+        // Check if session is still valid
+        if (now - sessionData.timestamp < config.sessionDuration) {
+          // Update timestamp
+          sessionData.timestamp = now;
+          sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
+          return sessionData.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Zappy Analytics: SessionStorage not available');
+    }
+    
+    // Generate new session ID
+    var newSessionId = 'zs_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    try {
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        id: newSessionId,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      // Continue without session storage
+    }
+    
+    return newSessionId;
+  }
+  
+  var visitorId = getVisitorId();
+  var sessionId = getSessionId();
+  
+  // Track an event
+  function trackEvent(eventType, data) {
+    data = data || {};
+    
+    var eventData = {
+      website_id: config.websiteId,
+      event_type: eventType,
+      page_path: window.location.pathname,
+      referrer: document.referrer || 'direct',
+      visitor_id: visitorId,
+      session_id: sessionId,
+      metadata: data
+    };
+    
+    // Use sendBeacon if available (better for page unload events)
+    if (navigator.sendBeacon) {
+      var blob = new Blob([JSON.stringify(eventData)], { type: 'application/json' });
+      navigator.sendBeacon(config.apiUrl, blob);
+    } else {
+      // Fallback to fetch
+      fetch(config.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(eventData),
+        keepalive: true
+      }).catch(function(error) {
+        console.warn('Zappy Analytics: Failed to track event', error);
+      });
+    }
+  }
+  
+  // Track page view
+  if (config.trackPageViews) {
+    trackEvent('pageview', {
+      title: document.title,
+      url: window.location.href
+    });
+  }
+  
+  // Track clicks on important elements
+  if (config.trackClicks) {
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      
+      // Track button clicks (counted as actions)
+      if (target.tagName === 'BUTTON' || target.closest('button')) {
+        var button = target.tagName === 'BUTTON' ? target : target.closest('button');
+        trackEvent('click', {
+          element: 'button',
+          text: button.textContent.trim().substring(0, 100),
+          id: button.id || null,
+          class: button.className || null
+        });
+      }
+      
+      // Track link clicks (navigation - not counted as actions)
+      else if (target.tagName === 'A' || target.closest('a')) {
+        var link = target.tagName === 'A' ? target : target.closest('a');
+        trackEvent('navigation', {
+          element: 'link',
+          text: link.textContent.trim().substring(0, 100),
+          href: link.href,
+          external: link.hostname !== window.location.hostname
+        });
+      }
+    }, true);
+  }
+  
+  // Track form submissions
+  if (config.trackFormSubmissions) {
+    document.addEventListener('submit', function(e) {
+      var form = e.target;
+      
+      trackEvent('form_submit', {
+        form_id: form.id || null,
+        form_name: form.name || null,
+        form_action: form.action || null,
+        form_method: form.method || 'GET'
+      });
+    }, true);
+  }
+  
+  // Track time on page (send on page unload)
+  var pageLoadTime = Date.now();
+  
+  window.addEventListener('beforeunload', function() {
+    var timeOnPage = Math.floor((Date.now() - pageLoadTime) / 1000); // in seconds
+    
+    trackEvent('page_unload', {
+      time_on_page: timeOnPage,
+      page_path: window.location.pathname
+    });
+  });
+  
+  // Expose tracking function globally for custom events
+  window.zappyAnalytics = {
+    track: trackEvent,
+    getVisitorId: function() { return visitorId; },
+    getSessionId: function() { return sessionId; }
+  };
+  
+})();
+</script>
+<!-- End Zappy Analytics -->
+    <meta property="og:title" content="Features — The Digital Reset">
+    <meta property="og:description" content="Features | The Digital Reset. shopify ecommerce website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Features — The Digital Reset">
+    <meta name="twitter:description" content="Features | The Digital Reset. shopify ecommerce website">
+    <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  
+  
+  
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .skip-link { position: absolute; top: 0; left: 0; transform: translateY(-200%); padding: 12px 18px; background: var(--bg-dark, #1a1a1a); color: var(--text-light, #fff); font-weight: 600; border-radius: 0 0 8px 0; z-index: 10000; }
+    .skip-link:focus { transform: none; outline: 2px solid var(--ring, #fff); outline-offset: 2px; }
+    :focus-visible { outline: 2px solid var(--ring, currentColor); outline-offset: 3px; }
+  </style>
+
+
+  
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon-512x512.png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <!-- Cookie Consent -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+    <!-- Mickidum Accessibility Toolbar -->
+    <script src="https://cdn.jsdelivr.net/gh/mickidum/acc_toolbar/acctoolbar/acctoolbar.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+
+    <style id="zappy-dropdown-submenu-styles">
+      /* ========== DESKTOP DROPDOWN SUBMENU STYLES ========== */
+      /* Base styles for dropdown submenus - parent must be positioned */
+      .nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu) { position: relative; }
+      /* Submenu base - hidden by default */
+      .nav-menu .sub-menu, nav .sub-menu, .navbar .sub-menu, #navMenu .sub-menu { display: block !important; position: absolute !important; top: 100%; left: 0; min-width: 220px; background: white; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); padding: 8px 0; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease; z-index: 1000; list-style: none; pointer-events: none; }
+      /* CRITICAL: Desktop hover styles to show dropdown */
+      .nav-menu li:hover > .sub-menu, nav li:hover > .sub-menu, .navbar li:hover > .sub-menu, #navMenu li:hover > .sub-menu { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; pointer-events: auto !important; }
+      /* Submenu item styling */
+      .sub-menu li { list-style: none; margin: 0; padding: 0; }
+      .sub-menu a { display: block !important; padding: 10px 16px !important; color: var(--text-dark, #333) !important; font-weight: 500; text-decoration: none; white-space: nowrap; transition: background-color 0.2s; }
+      .sub-menu .zappy-nav-child > a { padding-left: 28px !important; font-size: 0.9em !important; opacity: 0.85 !important; }
+      [dir="rtl"] .sub-menu .zappy-nav-child > a, html[lang="he"] .sub-menu .zappy-nav-child > a, html[lang="ar"] .sub-menu .zappy-nav-child > a { padding-left: 10px !important; padding-right: 28px !important; }
+      .sub-menu .zappy-nav-parent > a { font-weight: 600 !important; }
+      .sub-menu a:hover { background-color: #f5f5f5; }
+      /* RTL (Hebrew/Arabic) dropdown positioning */
+      [dir="rtl"] .nav-menu .sub-menu, [dir="rtl"] nav .sub-menu, [dir="rtl"] .navbar .sub-menu, html[lang="he"] .nav-menu .sub-menu, html[lang="he"] nav .sub-menu, html[lang="he"] .navbar .sub-menu, html[lang="ar"] .nav-menu .sub-menu, html[lang="ar"] nav .sub-menu, html[lang="ar"] .navbar .sub-menu { left: auto !important; right: 0 !important; }
+      /* Hide empty dropdown menus (exclude catalog sub-menus that use <a> children instead of <li>) */
+      .sub-menu:empty, .sub-menu:not(:has(li:not(.zappy-hidden-menu-item))):not(:has(> a)), .sub-menu:not(:has(li)):not(:has(> a)) { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+      /* Desktop: show submenu on Menu Group hover */
+      li:has(.menu-group-title):hover > .sub-menu { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; pointer-events: auto !important; }
+      /* Menu Group title styling */
+      .nav-menu > li > .menu-group-title, #navMenu > li > .menu-group-title { display: inline-block; padding: 0.5rem 1rem; cursor: default; user-select: none; }
+      
+      /* ========== MOBILE SUBMENU STYLES ========== */
+      @media (max-width: 768px) {
+        .nav-menu .sub-menu, nav .sub-menu, .navbar .sub-menu, #navMenu .sub-menu { position: static !important; transform: none !important; box-shadow: none !important; background: transparent !important; max-height: 0; overflow: hidden; opacity: 0; visibility: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; padding: 0 !important; border-radius: 0 !important; }
+        .navbar .sub-menu.mobile-expanded, .nav-menu .sub-menu.mobile-expanded, #navMenu .sub-menu.mobile-expanded { max-height: none !important; overflow-y: visible !important; opacity: 1 !important; visibility: visible !important; padding: 8px 0 8px 16px !important; }
+        [dir="rtl"] .sub-menu.mobile-expanded, html[lang="he"] .sub-menu.mobile-expanded { padding: 8px 16px 8px 0 !important; }
+        /* Disable hover behavior on mobile */
+        .nav-menu li:hover > .sub-menu, nav li:hover > .sub-menu, .navbar li:hover > .sub-menu, #navMenu li:hover > .sub-menu { opacity: 0; visibility: hidden; pointer-events: none; }
+        .nav-menu li > .sub-menu.mobile-expanded, nav li > .sub-menu.mobile-expanded, .navbar li > .sub-menu.mobile-expanded, #navMenu li > .sub-menu.mobile-expanded { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
+        .nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu) { display: flex !important; flex-wrap: wrap !important; align-items: center !important; position: relative !important; min-height: 44px !important; }
+        .nav-menu li:has(.sub-menu) > a, nav li:has(.sub-menu) > a, .navbar li:has(.sub-menu) > a, #navMenu li:has(.sub-menu) > a { flex: 1 !important; min-width: 0 !important; }
+        .nav-menu li:has(.sub-menu) > .menu-group-title, nav li:has(.sub-menu) > .menu-group-title, .navbar li:has(.sub-menu) > .menu-group-title, #navMenu li:has(.sub-menu) > .menu-group-title { flex: 1 !important; min-width: 0 !important; padding: 0 !important; line-height: inherit !important; }
+        .nav-menu li:has(.sub-menu) > .sub-menu, nav li:has(.sub-menu) > .sub-menu, .navbar li:has(.sub-menu) > .sub-menu, #navMenu li:has(.sub-menu) > .sub-menu { flex-basis: 100% !important; width: 100% !important; }
+        .nav-menu li:has(.sub-menu) > a [class*="chevron"], .nav-menu li:has(.sub-menu) > a [class*="arrow"], .nav-menu li:has(.sub-menu) > a .fa-chevron-down, .nav-menu li:has(.sub-menu) > a .fa-angle-down, nav li:has(.sub-menu) > a [class*="chevron"], nav li:has(.sub-menu) > a [class*="arrow"], #navMenu li:has(.sub-menu) > a [class*="chevron"], #navMenu li:has(.sub-menu) > a [class*="arrow"] { display: none !important; visibility: hidden !important; }
+        .mobile-submenu-toggle { display: flex !important; align-items: center !important; justify-content: center !important; width: 44px !important; height: auto !important; background: transparent !important; border: none !important; cursor: pointer !important; color: var(--text-light) !important; position: static !important; flex-shrink: 0 !important; align-self: stretch !important; z-index: 2 !important; padding: 0 !important; margin: 0 !important; }
+        .mobile-submenu-toggle::after { content: '' !important; width: 0 !important; height: 0 !important; border-left: 6px solid transparent !important; border-right: 6px solid transparent !important; border-top: 7px solid currentColor !important; transition: transform 0.3s ease !important; }
+        .mobile-submenu-toggle.expanded::after { transform: rotate(180deg) !important; }
+        .sub-menu a { padding: 10px 0 !important; display: block !important; color: var(--text-light) !important; white-space: normal !important; }
+        .sub-menu .zappy-nav-child > a { padding-left: 28px !important; font-size: 0.9em !important; opacity: 0.85 !important; }
+        [dir="rtl"] .sub-menu .zappy-nav-child > a, html[lang="he"] .sub-menu .zappy-nav-child > a, html[lang="ar"] .sub-menu .zappy-nav-child > a { padding-left: 0 !important; padding-right: 28px !important; }
+        .sub-menu .zappy-nav-parent > a { font-weight: 600 !important; }
+        .nav-menu.active, #navMenu.active { max-width: 100vw !important; overflow-x: hidden !important; box-sizing: border-box !important; }
+        .navbar .sub-menu li a, nav.navbar .sub-menu li a, .zappy-products-dropdown .sub-menu a { color: var(--text-light) !important; }
+      }
+      @media (min-width: 769px) { .mobile-submenu-toggle { display: none !important; } }
+    </style>
+
+    <style id="zappy-widget-visibility">
+      html[dir="rtl"] .whatsapp-float { right: 20px !important; left: auto !important; }
+      html[dir="ltr"] .whatsapp-float, html:not([dir]) .whatsapp-float { left: 20px !important; right: auto !important; }
+      html[dir="rtl"] #mic-access-tool-general-button, html[dir="rtl"] .mic-access-tool-general-button,
+      html[dir="rtl"] #mic-init-access-tool .mic-access-tool-general-button,
+      html[dir="rtl"] #mic-init-access-tool #mic-access-tool-general-button,
+      html[dir="rtl"] ._access-icon { left: 20px !important; right: auto !important; }
+      html[dir="ltr"] #mic-access-tool-general-button, html[dir="ltr"] .mic-access-tool-general-button,
+      html[dir="ltr"] #mic-init-access-tool .mic-access-tool-general-button,
+      html[dir="ltr"] #mic-init-access-tool #mic-access-tool-general-button,
+      html[dir="ltr"] ._access-icon,
+      html:not([dir]) #mic-access-tool-general-button, html:not([dir]) .mic-access-tool-general-button,
+      html:not([dir]) #mic-init-access-tool .mic-access-tool-general-button,
+      html:not([dir]) #mic-init-access-tool #mic-access-tool-general-button,
+      html:not([dir]) ._access-icon { right: 20px !important; left: auto !important; }
+      @media (max-width: 768px) { .whatsapp-float { display: flex !important; } }
+      @media (min-width: 769px) { .whatsapp-float { display: flex !important; } }
+      @media (max-width: 768px) {
+        #mic-access-tool-general-button, .mic-access-tool-general-button,
+        #mic-init-access-tool .mic-access-tool-general-button, #mic-init-access-tool #mic-access-tool-general-button,
+        ._access-icon { display: flex !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }
+        #mic-access-tool-box.opened-mic-access-tool, .mic-access-tool-box.opened-mic-access-tool,
+        #mic-init-access-tool #mic-access-tool-box.opened-mic-access-tool {
+          visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
+        }
+      }
+      @media (min-width: 769px) {
+        #mic-access-tool-general-button, .mic-access-tool-general-button,
+        #mic-init-access-tool .mic-access-tool-general-button, #mic-init-access-tool #mic-access-tool-general-button,
+        ._access-icon { display: flex !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }
+        #mic-access-tool-box.opened-mic-access-tool, .mic-access-tool-box.opened-mic-access-tool,
+        #mic-init-access-tool #mic-access-tool-box.opened-mic-access-tool {
+          visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
+        }
+      }
+    </style>
+</head>
+<body>
+
+
+    <div class="mobile-search-panel" id="mobile-search-panel">
+      <div class="search-wrapper">
+        <input type="text" id="mobile-search-input" placeholder="Search products..." autocomplete="off">
+        <button class="search-submit" id="mobile-search-submit" title="Search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button class="close-search" id="close-mobile-search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="search-results" id="mobile-search-results"></div>
+    </div>
+  
+<script>window.ZAPPY_WEBSITE_ID = "e0518119-bd84-43ae-8dc9-04c9d5c32c11";window.ZAPPY_API_BASE = "https://api.zappy5.com";</script><a class="skip-link" href="#main">Skip to main content</a>
+  <nav class="navbar">
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+    <svg class="hamburger-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+    </svg>
+    <svg class="close-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" style="display: none;">
+      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+    </svg>
+  </button>
+
+  <button class="phone-header-btn" data-phone="" aria-label="Call">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+    </svg>
+  </button>
+
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a href="/" class="logo-link"><img class="logo" src="/assets/site-features-image-1.webp" alt="The Digital Reset"></a>
+    </div>
+
+    <ul class="nav-menu" id="navMenu">
+
+    <li class="menu-item-has-children zappy-products-dropdown">
+      <a href="/en/products">
+        Products
+        <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9l6 6 6-6"></path>
+        </svg>
+      </a>
+      <ul class="sub-menu" id="zappy-nav-category-links">
+        <li><a href="/en/products">All Courses</a></li>
+        <!-- Categories will be loaded dynamically -->
+      </ul>
+    </li>
+  <li><a href="/">Home</a></li><li><a href="/features">Features</a></li><li><a href="/about">About</a></li><li><a href="/contact">Contact</a></li></ul><div class="nav-ecommerce-icons nav-icons-left"><a href="/login" class="login-link nav-login" title="Login"><svg class="login-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a><a href="#cart" class="cart-link nav-cart" id="cart-drawer-toggle" title="Cart"><svg class="cart-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="cart-count">0</span></a><div class="nav-search-box">
+    <input type="text" class="nav-search-input" id="nav-search-input" placeholder="Search products..." autocomplete="off">
+    <button class="nav-search-btn" id="nav-search-btn" title="Search">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    </button>
+    <div class="nav-search-results" id="nav-search-results"></div>
+  </div></div><div class="nav-ecommerce-icons nav-icons-right"><button class="nav-search-toggle" id="mobile-search-toggle" title="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button></div>
+
+    
+  </div>
+</nav>
+
+    <nav class="zappy-catalog-menu ltr" id="zappy-catalog-menu" dir="ltr" style="display:none">
+      <div class="catalog-menu-container">
+        <a href="/en/products" class="catalog-menu-item catalog-menu-all">All Courses</a>
+        <div class="catalog-menu-categories" id="zappy-category-links">
+          <!-- Categories will be loaded dynamically -->
+        </div>
+      </div>
+    </nav>
+  
+<script>
+
+// Navbar Mobile Menu Toggle and Contrast Fix
+(function() {
+  // Use 'load' event instead of 'DOMContentLoaded' to ensure we run AFTER all other scripts
+  window.addEventListener('load', function() {
+    
+    // FIX MOBILE BUTTON CONTRAST
+    // Detect navbar background color and apply contrasting color to mobile buttons
+    const navbar = document.querySelector('.navbar, nav, header');
+    if (!navbar) {
+      console.log('[Navbar] Navbar element not found');
+      return;
+    }
+    
+    // DECLARE VARIABLES EARLY to avoid Temporal Dead Zone errors
+    // These are used in multiple places below
+    let mobileToggle = document.getElementById('mobileToggle') ||
+                       document.querySelector('.mobile-toggle') ||
+                       document.querySelector('.hamburger') ||
+                       document.querySelector('.hamburger-menu') ||
+                       document.querySelector('.menu-toggle') ||
+                       document.querySelector('.burger-menu') ||
+                       document.querySelector('[aria-label="Menu"]') ||
+                       document.querySelector('[aria-label="תפריט"]');
+    
+    const phoneBtn = document.querySelector('.phone-header-btn');
+    
+    const computedStyle = window.getComputedStyle(navbar);
+    let bgColor = computedStyle.backgroundColor;
+    
+    console.log('[Navbar] Initial navbar background:', bgColor);
+    
+    // Check if background is transparent or rgba with 0 alpha
+    const isTransparent = bgColor === 'transparent' || 
+                         bgColor === 'rgba(0, 0, 0, 0)' ||
+                         (bgColor.startsWith('rgba') && bgColor.includes(', 0)'));
+    
+    if (isTransparent) {
+      // Check for background-image or gradient
+      const bgImage = computedStyle.backgroundImage;
+      if (bgImage && bgImage !== 'none') {
+        console.log('[Navbar] Navbar has background image/gradient, using dark text');
+        bgColor = 'rgb(240, 240, 240)'; // Assume light background
+      } else {
+        // Transparent navbar - check body background
+        const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+        console.log('[Navbar] Navbar transparent, using body background:', bodyBg);
+        bgColor = bodyBg;
+      }
+    }
+    
+    // Calculate luminance to determine if background is light or dark
+    const rgb = bgColor.match(/\d+/g);
+    if (rgb && rgb.length >= 3) {
+      const r = parseInt(rgb[0]);
+      const g = parseInt(rgb[1]);
+      const b = parseInt(rgb[2]);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      
+      // Mobile button colors are set by Claude's AI-generated CSS (same as .nav-menu a)
+      // No dynamic color overrides needed - colors come from the generated navbar CSS
+      console.log('[Navbar] Mobile button colors preserved from Claude CSS (luminance:', luminance.toFixed(2) + ')');
+      
+      // FIX ICON SIZES - Ensure SVGs are properly sized and visible
+      // INJECT CRITICAL CSS TO OVERRIDE ANY CONFLICTING RULES
+      const criticalCSS = document.createElement('style');
+      criticalCSS.id = 'zappy-mobile-nav-fix';
+      const htmlLang = document.documentElement.lang || 'en';
+      const htmlDir = document.documentElement.dir || 'ltr';
+      // Check both dir attribute AND lang for RTL detection
+      // dir="rtl" is the most reliable indicator
+      const isRTL = htmlDir === 'rtl' || htmlLang === 'he' || htmlLang === 'ar';
+      
+      criticalCSS.textContent = `
+        /* Hide mobile buttons on desktop, show only on mobile */
+        @media (min-width: 769px) {
+          .mobile-toggle,
+          .phone-header-btn {
+            display: none !important;
+          }
+        }
+        
+        /* Show and position mobile buttons correctly on mobile */
+        @media (max-width: 768px) {
+          .navbar,
+          nav.navbar {
+            min-height: 70px !important;
+          }
+
+          .mobile-toggle,
+          .phone-header-btn {
+            position: absolute !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            margin-top: auto !important;
+            margin-bottom: auto !important;
+            transform: none !important;
+            z-index: 1001 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 50% !important;
+            border: none !important;
+            cursor: pointer !important;
+            padding: 6px !important;
+            background: none !important;
+            color: var(--nav-text, var(--text-light)) !important;
+            touch-action: manipulation !important;
+            -webkit-tap-highlight-color: transparent !important;
+          }
+
+          html[data-zappy-site-type="ecommerce"] .phone-header-btn,
+          body[data-zappy-site-type="ecommerce"] .phone-header-btn,
+          html[data-zappy-site-type="ecommerce"] header .phone-header-btn,
+          html[data-zappy-site-type="ecommerce"] nav .phone-header-btn {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
+          }
+          
+          /* LTR positioning (default): hamburger LEFT, phone RIGHT */
+          html:not([dir="rtl"]):not([lang="he"]):not([lang="ar"]) .mobile-toggle,
+          html[dir="ltr"] .mobile-toggle {
+            left: 12px !important;
+            right: auto !important;
+          }
+          html:not([dir="rtl"]):not([lang="he"]):not([lang="ar"]) .phone-header-btn,
+          html[dir="ltr"] .phone-header-btn {
+            right: 12px !important;
+            left: auto !important;
+          }
+          
+          /* RTL positioning: hamburger RIGHT, phone LEFT */
+          html[dir="rtl"] .mobile-toggle,
+          html[lang="he"] .mobile-toggle,
+          html[lang="ar"] .mobile-toggle {
+            right: 12px !important;
+            left: auto !important;
+          }
+          html[dir="rtl"] .phone-header-btn,
+          html[lang="he"] .phone-header-btn,
+          html[lang="ar"] .phone-header-btn {
+            left: 12px !important;
+            right: auto !important;
+          }
+          
+          /* CRITICAL: Ensure nav-container has min-height on mobile */
+          /* All children are positioned absolutely/fixed on mobile, so height:auto collapses to 0 */
+          .nav-container {
+            min-height: 70px !important;
+            position: relative !important;
+          }
+          
+          /* Ensure SVG icons are properly sized and inherit color */
+          .mobile-toggle svg,
+          .phone-header-btn svg {
+            width: 24px !important;
+            height: 24px !important;
+            /* Don't force display - let JavaScript control hamburger/close toggle */
+          }
+          
+          /* Reset nav-cta-container on mobile - remove desktop box-shadow/padding */
+          /* that creates a visible ghost box when CTA button is hidden */
+          .nav-cta-container {
+            box-shadow: none !important;
+            padding: 0 !important;
+          }
+          
+          /* Hide nav-cta-container entirely on mobile when there's no lang-switcher */
+          /* (only the CTA button is inside, and it's hidden on mobile) */
+          .nav-cta-container:not(:has(.lang-switcher)) {
+            display: none !important;
+          }
+          
+          /* CRITICAL: Prevent hero image fade gradient from bleeding over headline text */
+          /* The .image-fade-gradient has bottom: -30px (extends below parent) */
+          /* On mobile stacked layout, this overlaps the h1 text below the image */
+          .hero-image-column {
+            overflow: hidden !important;
+          }
+          .image-fade-gradient {
+            bottom: 0 !important;
+          }
+          
+          /* Hide desktop language switcher on mobile - hamburger menu handles it */
+          /* High specificity to override stored CSS */
+          .lang-switcher,
+          .nav-cta-container .lang-switcher,
+          .nav-container .lang-switcher,
+          .navbar .lang-switcher,
+          .navbar .nav-cta-container .lang-switcher {
+            display: none !important;
+          }
+        }
+      `;
+      
+      // Remove existing fix if present and inject new one
+      const existing = document.getElementById('zappy-mobile-nav-fix');
+      if (existing) existing.remove();
+      document.head.appendChild(criticalCSS);
+      
+      console.log('[Navbar] Critical CSS injected for mobile nav positioning');
+      
+      // ONLY apply inline positioning styles on mobile viewport
+      // On desktop, the CSS handles hiding these buttons with display: none
+      // Inline styles were breaking desktop layout by overriding CSS
+      const isMobileViewport = window.innerWidth <= 768;
+      
+      if (mobileToggle) {
+        // Icon sizing applies to all viewports for consistency
+        const hamburgerIcon = mobileToggle.querySelector('.hamburger-icon');
+        const closeIcon = mobileToggle.querySelector('.close-icon');
+        
+        if (hamburgerIcon) {
+          hamburgerIcon.style.setProperty('width', '24px', 'important');
+          hamburgerIcon.style.setProperty('height', '24px', 'important');
+          hamburgerIcon.style.setProperty('display', 'block', 'important'); // Show hamburger by default
+        }
+        if (closeIcon) {
+          closeIcon.style.setProperty('width', '24px', 'important');
+          closeIcon.style.setProperty('height', '24px', 'important');
+          closeIcon.style.setProperty('display', 'none', 'important'); // Hide close icon by default
+        }
+        
+        // ONLY set positioning inline styles on mobile
+        if (isMobileViewport) {
+          mobileToggle.style.setProperty('position', 'absolute', 'important');
+          mobileToggle.style.setProperty('top', '0', 'important');
+          mobileToggle.style.setProperty('bottom', '0', 'important');
+          mobileToggle.style.setProperty('margin-top', 'auto', 'important');
+          mobileToggle.style.setProperty('margin-bottom', 'auto', 'important');
+          mobileToggle.style.setProperty('transform', 'none', 'important');
+          mobileToggle.style.setProperty('z-index', '1001', 'important');
+          
+          // Clear any inline left/right so CSS can take over based on html[dir]
+          mobileToggle.style.removeProperty('left');
+          mobileToggle.style.removeProperty('right');
+          
+          console.log('[Navbar] Mobile toggle positioning applied (mobile viewport)');
+        } else {
+          // On desktop, clear any positioning styles to let CSS handle it
+          mobileToggle.style.removeProperty('position');
+          mobileToggle.style.removeProperty('top');
+          mobileToggle.style.removeProperty('transform');
+          mobileToggle.style.removeProperty('z-index');
+          mobileToggle.style.removeProperty('left');
+          mobileToggle.style.removeProperty('right');
+          console.log('[Navbar] Desktop viewport - cleared mobile toggle inline positioning');
+        }
+      }
+      
+      if (phoneBtn) {
+        // Icon sizing applies to all viewports
+        const phoneIcon = phoneBtn.querySelector('svg');
+        if (phoneIcon) {
+          phoneIcon.style.width = '24px';
+          phoneIcon.style.height = '24px';
+          phoneIcon.setAttribute('width', '24');
+          phoneIcon.setAttribute('height', '24');
+        }
+        
+        // ONLY set positioning inline styles on mobile
+        if (isMobileViewport) {
+          phoneBtn.style.setProperty('position', 'absolute', 'important');
+          phoneBtn.style.setProperty('top', '0', 'important');
+          phoneBtn.style.setProperty('bottom', '0', 'important');
+          phoneBtn.style.setProperty('margin-top', 'auto', 'important');
+          phoneBtn.style.setProperty('margin-bottom', 'auto', 'important');
+          phoneBtn.style.setProperty('transform', 'none', 'important');
+          phoneBtn.style.setProperty('z-index', '1001', 'important');
+          
+          // Clear any inline left/right so CSS can take over based on html[dir]
+          phoneBtn.style.removeProperty('left');
+          phoneBtn.style.removeProperty('right');
+          
+          console.log('[Navbar] Phone button positioning applied (mobile viewport)');
+        } else {
+          // On desktop, clear any positioning styles to let CSS handle it
+          phoneBtn.style.removeProperty('position');
+          phoneBtn.style.removeProperty('top');
+          phoneBtn.style.removeProperty('transform');
+          phoneBtn.style.removeProperty('z-index');
+          phoneBtn.style.removeProperty('left');
+          phoneBtn.style.removeProperty('right');
+          console.log('[Navbar] Desktop viewport - cleared phone button inline positioning');
+        }
+      }
+    } else {
+      console.log('[Navbar] Could not parse background color:', bgColor);
+    }
+    
+    // MOBILE MENU TOGGLE
+    // Re-query in case DOM changed (mobileToggle already declared at top of function)
+    mobileToggle = document.getElementById('mobileToggle') ||
+                   document.querySelector('.mobile-toggle') ||
+                   document.querySelector('.hamburger') ||
+                   document.querySelector('.hamburger-menu') ||
+                   document.querySelector('.menu-toggle') ||
+                   document.querySelector('.burger-menu') ||
+                   document.querySelector('[aria-label="Menu"]') ||
+                   document.querySelector('[aria-label="תפריט"]');
+    
+    // EXPANDED SEARCH: Find nav menu by ID or class
+    const navMenu = document.getElementById('navMenu') ||
+                  document.querySelector('.nav-menu') ||
+                  document.querySelector('.nav-links') ||
+                  document.querySelector('nav ul:not(.submenu)');
+    
+    if (!mobileToggle || !navMenu) {
+      console.log('[Navbar] Mobile toggle or menu not found:', { toggle: !!mobileToggle, menu: !!navMenu });
+      return;
+    }
+    
+    // Ensure navMenu has ID for CSS targeting
+    if (!navMenu.id) {
+      navMenu.id = 'navMenu';
+    }
+    
+    console.log('[Navbar] Initializing mobile menu...');
+    
+    // Remove any existing event listeners by cloning the button
+    const newToggle = mobileToggle.cloneNode(true);
+    mobileToggle.parentNode.replaceChild(newToggle, mobileToggle);
+    
+    // Toggle menu handler (shared by click and touchend)
+    function handleToggle(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const hamburgerIcon = newToggle.querySelector('.hamburger-icon');
+      const closeIcon = newToggle.querySelector('.close-icon');
+      const isActive = navMenu.classList.contains('active');
+      
+      if (isActive) {
+        // Close menu
+        navMenu.classList.remove('active');
+        if (hamburgerIcon) hamburgerIcon.style.setProperty('display', 'block', 'important');
+        if (closeIcon) closeIcon.style.setProperty('display', 'none', 'important');
+        document.body.style.overflow = '';
+        console.log('[Navbar] Menu closed');
+      } else {
+        // Open menu
+        navMenu.classList.add('active');
+        if (hamburgerIcon) hamburgerIcon.style.setProperty('display', 'none', 'important');
+        if (closeIcon) closeIcon.style.setProperty('display', 'block', 'important');
+        document.body.style.overflow = 'hidden';
+        console.log('[Navbar] Menu opened');
+      }
+    }
+    
+    // Use click for desktop/emulation and touchend as iOS Safari fallback.
+    // Prevent double-fire with a timestamp guard.
+    var lastToggleTime = 0;
+    function guardedToggle(e) {
+      var now = Date.now();
+      if (now - lastToggleTime < 300) return;
+      lastToggleTime = now;
+      handleToggle(e);
+    }
+    
+    newToggle.addEventListener('click', guardedToggle);
+    newToggle.addEventListener('touchend', guardedToggle);
+    
+    // Close menu when clicking nav links (but NOT dropdown toggles)
+    const navLinks = navMenu.querySelectorAll('a');
+    navLinks.forEach(function(link) {
+      link.addEventListener('click', function() {
+        // Don't close if it's a dropdown child (unless it's a real navigation link)
+        if (this.getAttribute('href') === '#') return;
+        
+        const hamburgerIcon = newToggle.querySelector('.hamburger-icon');
+        const closeIcon = newToggle.querySelector('.close-icon');
+        
+        navMenu.classList.remove('active');
+        if (hamburgerIcon) hamburgerIcon.style.setProperty('display', 'block', 'important');
+        if (closeIcon) closeIcon.style.setProperty('display', 'none', 'important');
+        document.body.style.overflow = '';
+        console.log('[Navbar] Menu closed (link clicked)');
+      });
+    });
+    
+    // DROPDOWN MENU TOGGLE (for mobile and touch devices)
+    var dropdownToggles = navMenu.querySelectorAll('.dropdown-toggle');
+    dropdownToggles.forEach(function(toggle) {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var parent = this.closest('.nav-dropdown');
+        if (!parent) return;
+        
+        // Close other open dropdowns at the same level
+        var siblings = parent.parentNode.querySelectorAll('.nav-dropdown.open');
+        siblings.forEach(function(sib) {
+          if (sib !== parent) sib.classList.remove('open');
+        });
+        
+        parent.classList.toggle('open');
+        console.log('[Navbar] Dropdown toggled:', parent.classList.contains('open') ? 'open' : 'closed');
+      });
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.nav-dropdown')) {
+        var openDropdowns = document.querySelectorAll('.nav-dropdown.open');
+        openDropdowns.forEach(function(dd) { dd.classList.remove('open'); });
+      }
+    });
+    
+    console.log('[Navbar] Dropdown handlers initialized for ' + dropdownToggles.length + ' dropdowns');
+    
+    // Phone button functionality (phoneBtn already declared at top of function)
+    if (phoneBtn) {
+      phoneBtn.addEventListener('click', function() {
+        // Get phone number from placeholder in page or use default
+        const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+        const phoneNumber = phoneLinks.length > 0 
+          ? phoneLinks[0].getAttribute('href').replace('tel:', '')
+          : '[business_phone]';
+        
+        window.location.href = 'tel:' + phoneNumber;
+        console.log('[Navbar] Phone button clicked');
+      });
+    }
+    
+    console.log('[Navbar] Mobile menu initialized successfully');
+    
+    // WhatsApp button visibility is now controlled via CSS (siteSettings).
+    // No JS-based desktop hiding — the button is visible on both mobile and desktop by default.
+  });
+})();
+
+</script>
+  
+  <main id="main">
+    <section class="features-intro-section" data-layout-spec="Features-intro">
+  <!-- Grain texture overlay -->
+  <div class="features-intro-grain" aria-hidden="true"></div>
+
+  <div class="features-intro-container">
+
+    <!-- Text block -->
+    <div class="features-intro-text">
+      <span class="features-intro-eyebrow">The Digital Reset</span>
+      <h1 class="features-intro-heading">A Modern Framework<br>for Selling Digital&nbsp;Goods</h1>
+      <p class="features-intro-lead">Clarity, mobility, and strong brand perception — built into every layer of your Shopify ecommerce store. The Digital Reset is the operating system ambitious creators use to sell smarter, move faster, and own their market.</p>
+      <div class="features-intro-rule" aria-hidden="true"></div>
+      <p class="features-intro-sub">Everything you need to launch, grow, and scale your ecommerce fulfillment services — designed for operators who refuse to settle for average.</p>
+    </div>
+
+    <!-- Editorial image -->
+    <figure class="features-intro-figure">
+      <img loading="eager" fetchpriority="high" data-placeholder="features-intro-image-1" data-context="Wide editorial flat-lay photograph showing a sleek laptop, a digital product dashboard on screen, a minimal notebook, a branded coffee mug, and a small succulent on a clean light-grey marble desk surface. The composition is cinematic and premium, lit with soft diffused natural light from the left. The mood is calm, modern, and aspirational — representing a digital entrepreneur" s="" workspace.="" the="" colour="" palette="" is="" muted="" whites,="" warm="" greys,="" and="" soft="" indigo="" accents.'="" width="1100" height="580" src="/assets/site-features-intro-image-1.webp" alt="Premium digital entrepreneur workspace with laptop showing a digital product dashboard">
+      <figcaption class="features-intro-caption">The workspace of the modern digital operator.</figcaption>
+    </figure>
+
+  </div>
+</section>
+
+<section class="features-benefits-section" data-layout-spec="Features-benefits">
+  <div class="fbs-container">
+
+    <!-- Header Row -->
+    <div class="fbs-header-row">
+      <div class="fbs-title-block">
+        <span class="fbs-eyebrow">Why Digital Products</span>
+        <h2 class="fbs-heading">Built for the way<br>modern business moves.</h2>
+      </div>
+      <div class="fbs-intro-block">
+        <p class="fbs-intro-text">Digital products represent one of the most efficient business models available today — zero inventory, instant delivery, and unlimited scale. Whether you're launching your first Shopify ecommerce store or expanding an existing catalog, these advantages compound over time.</p>
+        <div class="fbs-rule"></div>
+      </div>
+    </div>
+
+    <!-- 2x2 Benefits Grid -->
+    <div class="fbs-grid">
+
+      <!-- Benefit 1 -->
+      <article class="fbs-tile">
+        <div class="fbs-tile-corner fbs-corner-tl" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M4 4 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M4 4 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="4" cy="4" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+        <div class="fbs-tile-number" aria-hidden="true">01</div>
+        <div class="fbs-tile-icon-wrap">
+          <svg data-element-type="icon" data-icon-type="svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40" aria-hidden="true">
+            <path d="M20 4 L36 12 L36 28 L20 36 L4 28 L4 12 Z" stroke="currentColor" stroke-width="1.5" fill="none"></path>
+            <path d="M20 4 L20 36" stroke="currentColor" stroke-width="1" opacity="0.5"></path>
+            <path d="M4 12 L36 12" stroke="currentColor" stroke-width="1" opacity="0.5"></path>
+            <path d="M4 28 L36 28" stroke="currentColor" stroke-width="1" opacity="0.5"></path>
+            <circle cx="20" cy="20" r="5" stroke="currentColor" stroke-width="1.5" fill="none"></circle>
+          </svg>
+        </div>
+        <h3 class="fbs-tile-heading">Scalable Income Potential</h3>
+        <p class="fbs-tile-body">Sell the same product to one customer or ten thousand — your margins stay constant. Digital goods eliminate the ceiling on revenue, letting your ecommerce fulfillment scale without proportional cost increases or logistical friction.</p>
+        <div class="fbs-tile-corner fbs-corner-br" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M44 44 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M44 44 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="44" cy="44" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Benefit 2 -->
+      <article class="fbs-tile">
+        <div class="fbs-tile-corner fbs-corner-tl" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M4 4 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M4 4 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="4" cy="4" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+        <div class="fbs-tile-number" aria-hidden="true">02</div>
+        <div class="fbs-tile-icon-wrap">
+          <svg data-element-type="icon" data-icon-type="svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40" aria-hidden="true">
+            <rect x="6" y="10" width="28" height="20" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"></rect>
+            <path d="M13 10 L13 30" stroke="currentColor" stroke-width="1" opacity="0.5"></path>
+            <path d="M27 10 L27 30" stroke="currentColor" stroke-width="1" opacity="0.5"></path>
+            <path d="M6 20 L34 20" stroke="currentColor" stroke-width="1" opacity="0.5"></path>
+            <path d="M18 34 L22 34" stroke="currentColor" stroke-width="1.5"></path>
+            <path d="M14 36 L26 36" stroke="currentColor" stroke-width="1.5"></path>
+          </svg>
+        </div>
+        <h3 class="fbs-tile-heading">Low Operational Overhead</h3>
+        <p class="fbs-tile-body">No warehousing, no shipping logistics, no physical inventory to manage. Your operating costs stay lean from day one — freeing capital to invest in growth, product development, and marketing your amazon ecommerce platform or independent store.</p>
+        <div class="fbs-tile-corner fbs-corner-br" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M44 44 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M44 44 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="44" cy="44" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Benefit 3 -->
+      <article class="fbs-tile">
+        <div class="fbs-tile-corner fbs-corner-tl" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M4 4 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M4 4 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="4" cy="4" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+        <div class="fbs-tile-number" aria-hidden="true">03</div>
+        <div class="fbs-tile-icon-wrap">
+          <svg data-element-type="icon" data-icon-type="svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40" aria-hidden="true">
+            <circle cx="20" cy="20" r="14" stroke="currentColor" stroke-width="1.5" fill="none"></circle>
+            <ellipse cx="20" cy="20" rx="7" ry="14" stroke="currentColor" stroke-width="1" opacity="0.5"></ellipse>
+            <path d="M6 20 L34 20" stroke="currentColor" stroke-width="1" opacity="0.5"></path>
+            <path d="M8 13 L32 13" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M8 27 L32 27" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="20" cy="20" r="2.5" fill="currentColor" opacity="0.6"></circle>
+          </svg>
+        </div>
+        <h3 class="fbs-tile-heading">Location-Independent Delivery</h3>
+        <p class="fbs-tile-body">Your store operates across every time zone simultaneously. Products are delivered the moment payment clears — no delays, no borders, no couriers. Build a global audience from anywhere and serve customers around the clock without lifting a finger.</p>
+        <div class="fbs-tile-corner fbs-corner-br" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M44 44 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M44 44 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="44" cy="44" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Benefit 4 -->
+      <article class="fbs-tile">
+        <div class="fbs-tile-corner fbs-corner-tl" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M4 4 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M4 4 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="4" cy="4" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+        <div class="fbs-tile-number" aria-hidden="true">04</div>
+        <div class="fbs-tile-icon-wrap">
+          <svg data-element-type="icon" data-icon-type="svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40" aria-hidden="true">
+            <rect x="8" y="6" width="24" height="30" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"></rect>
+            <path d="M13 13 L27 13" stroke="currentColor" stroke-width="1.5"></path>
+            <path d="M13 19 L27 19" stroke="currentColor" stroke-width="1.5"></path>
+            <path d="M13 25 L21 25" stroke="currentColor" stroke-width="1.5"></path>
+            <circle cx="30" cy="30" r="7" fill="var(--bg-light)" stroke="currentColor" stroke-width="1.5"></circle>
+            <path d="M27.5 30 L29.5 32 L33 28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </div>
+        <h3 class="fbs-tile-heading">Elevated Customer Experience</h3>
+        <p class="fbs-tile-body">Polished digital assets signal professionalism before a single word is read. High-quality templates, guides, and tools create immediate perceived value — turning first-time buyers into loyal advocates who return to your shopify ecommerce website again and again.</p>
+        <div class="fbs-tile-corner fbs-corner-br" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+            <path d="M44 44 L4 44" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <path d="M44 44 L44 4" stroke="currentColor" stroke-width="1" opacity="0.35"></path>
+            <circle cx="44" cy="44" r="2.5" fill="currentColor" opacity="0.25"></circle>
+          </svg>
+        </div>
+      </article>
+
+    </div>
+    <!-- end grid -->
+
+  </div>
+</section>
+
+<section class="features-process-section" data-layout-spec="Features-process">
+  <div class="fps-container">
+
+    <!-- Section Header -->
+    <div class="fps-header">
+      <span class="fps-eyebrow">How It Works</span>
+      <h2 class="fps-title">From Idea to Income,<br>In Three Moves</h2>
+      <p class="fps-subtitle">Build a premium digital products business with a clear, repeatable framework. Identify who you serve, package what you know, and present it through a brand experience that converts.</p>
+    </div>
+
+    <!-- Connector Line (decorative) -->
+    <div class="fps-track" aria-hidden="true">
+      <svg class="fps-track-svg" data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 900 2" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="0" y1="1" x2="900" y2="1" stroke="var(--primary)" stroke-width="1" stroke-dasharray="6 6" opacity="0.35"></line>
+      </svg>
+    </div>
+
+    <!-- Steps Grid -->
+    <div class="fps-steps">
+
+      <!-- Step 1 -->
+      <article class="fps-step">
+        <div class="fps-step-top">
+          <div class="fps-step-number-wrap">
+            <span class="fps-step-num">01</span>
+            <span class="fps-accent-dot" aria-hidden="true"></span>
+          </div>
+          <div class="fps-step-icon-wrap">
+            <svg data-element-type="icon" data-icon-type="svg" class="fps-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <circle cx="24" cy="18" r="8" stroke="currentColor" stroke-width="1.5"></circle>
+              <path d="M8 40c0-8.837 7.163-16 16-16s16 7.163 16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+              <circle cx="38" cy="14" r="4" stroke="currentColor" stroke-width="1.5" opacity="0.5"></circle>
+              <circle cx="10" cy="14" r="4" stroke="currentColor" stroke-width="1.5" opacity="0.5"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="fps-step-body">
+          <h3 class="fps-step-title">Know Your Audience</h3>
+          <p class="fps-step-desc">Define exactly who you're building for. Understand their pain points, aspirations, and the specific transformation they're seeking. Precision here determines everything downstream — from product scope to pricing power on your Shopify ecommerce store.</p>
+          <ul class="fps-step-bullets">
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Audience research &amp; segmentation</li>
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Niche clarity &amp; positioning</li>
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Demand validation</li>
+          </ul>
+        </div>
+        <div class="fps-step-connector" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Step 2 -->
+      <article class="fps-step">
+        <div class="fps-step-top">
+          <div class="fps-step-number-wrap">
+            <span class="fps-step-num">02</span>
+            <span class="fps-accent-dot fps-accent-dot--accent" aria-hidden="true"></span>
+          </div>
+          <div class="fps-step-icon-wrap">
+            <svg data-element-type="icon" data-icon-type="svg" class="fps-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <rect x="10" y="8" width="28" height="32" rx="3" stroke="currentColor" stroke-width="1.5"></rect>
+              <path d="M16 16h16M16 22h16M16 28h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+              <circle cx="36" cy="36" r="6" fill="var(--primary)" opacity="0.15"></circle>
+              <path d="M33 36l2 2 4-4" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="fps-step-body">
+          <h3 class="fps-step-title">Package Your Knowledge</h3>
+          <p class="fps-step-desc">Transform your expertise into high-value downloadable assets — guides, templates, courses, or toolkits. Structure your content for maximum impact and perceived value, creating digital products people are proud to own and eager to share.</p>
+          <ul class="fps-step-bullets">
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Digital product creation</li>
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Content architecture &amp; scope</li>
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Value-first packaging</li>
+          </ul>
+        </div>
+        <div class="fps-step-connector" aria-hidden="true">
+          <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Step 3 -->
+      <article class="fps-step fps-step--last">
+        <div class="fps-step-top">
+          <div class="fps-step-number-wrap">
+            <span class="fps-step-num">03</span>
+            <span class="fps-accent-dot" aria-hidden="true"></span>
+          </div>
+          <div class="fps-step-icon-wrap">
+            <svg data-element-type="icon" data-icon-type="svg" class="fps-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <path d="M8 38l10-12 8 6 6-8 8 14H8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+              <circle cx="36" cy="12" r="5" stroke="currentColor" stroke-width="1.5"></circle>
+              <path d="M36 9v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+              <path d="M14 12h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"></path>
+              <path d="M14 17h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="fps-step-body">
+          <h3 class="fps-step-title">Present with Premium Brand</h3>
+          <p class="fps-step-desc">Launch through a premium brand experience that builds instant trust and drives conversion. A polished storefront — whether a Shopify ecommerce store or a custom platform — signals quality before a single word is read, commanding the prices your work deserves.</p>
+          <ul class="fps-step-bullets">
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Brand identity &amp; visual language</li>
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Storefront &amp; checkout design</li>
+            <li><span class="fps-bullet-dot" aria-hidden="true"></span>Launch &amp; growth strategy</li>
+          </ul>
+        </div>
+      </article>
+
+    </div>
+    <!-- /Steps Grid -->
+
+  </div>
+</section>
+
+<section class="features-showcase-section" data-layout-spec="Features-showcase">
+  <!-- Subtle paper grain texture overlay -->
+  <div class="fss-grain-overlay" aria-hidden="true"></div>
+
+  <div class="fss-container">
+
+    <!-- Text block above collage -->
+    <div class="fss-header">
+      <div class="fss-eyebrow">
+        <span class="fss-eyebrow-line" aria-hidden="true"></span>
+        <span class="fss-eyebrow-text">Digital Product Directions</span>
+      </div>
+      <h2 class="fss-heading">Tools Built for the Way<br>You Actually Operate</h2>
+      <p class="fss-subheading">The Digital Reset is a platform for ambitious online operators — a space where premium digital products meet strategic clarity. From structured planning systems to creator-ready toolkits, every product direction we explore is designed to accelerate momentum and reduce friction across your Shopify ecommerce store or independent digital venture.</p>
+    </div>
+
+    <!-- Asymmetric editorial collage -->
+    <div class="fss-collage">
+
+      <!-- Large tile — START side -->
+      <div class="fss-tile fss-tile--large">
+        <div class="fss-tile-inner">
+          <img loading="lazy" decoding="async" data-placeholder="features-showcase-image-1" data-context="Premium digital product flatlay: an open digital planner displayed on a sleek MacBook screen alongside a stylish iPad showing a business template, placed on a minimal matte desk. Atmospheric indigo and violet gradient background. Editorial, cinematic lighting. High-end e-commerce product photography aesthetic. Sophisticated and modern." width="620" height="700" src="/assets/site-features-showcase-image-1.webp" alt="Digital planner and business template on laptop and tablet screens">
+          <div class="fss-tile-badge">
+            <span class="fss-badge-label">Planning Systems</span>
+          </div>
+          <div class="fss-tile-caption">
+            <h3 class="fss-tile-title">Strategic Clarity,<br>Downloaded Instantly</h3>
+            <p class="fss-tile-desc">Digital planners and structured frameworks that bring order to ambitious ideas.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stacked smaller tiles — END side -->
+      <div class="fss-tile-stack">
+
+        <!-- Small tile top -->
+        <div class="fss-tile fss-tile--small">
+          <div class="fss-tile-inner">
+            <img loading="lazy" decoding="async" data-placeholder="features-showcase-image-2" data-context="Overhead flat lay of premium business template documents and brand identity workbooks spread on a clean white desk. Minimalist aesthetic with a soft indigo accent. Digital download product photography. Editorial, high-contrast lighting. Modern e-commerce brand feel." width="560" height="310" src="/assets/site-features-showcase-image-2.webp" alt="Premium business templates and brand workbooks for digital creators">
+            <div class="fss-tile-badge">
+              <span class="fss-badge-label">Business Templates</span>
+            </div>
+            <div class="fss-tile-caption fss-tile-caption--small">
+              <h3 class="fss-tile-title fss-tile-title--small">Frameworks That<br>Move the Needle</h3>
+              <p class="fss-tile-desc fss-tile-desc--small">Ready-to-deploy business templates built for modern ecommerce fulfillment and brand growth.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Small tile bottom -->
+        <div class="fss-tile fss-tile--small fss-tile--accent">
+          <div class="fss-tile-inner fss-tile-inner--dark">
+            <img loading="lazy" decoding="async" data-placeholder="features-showcase-image-3" data-context="Cinematic close-up of a creator toolkit: a glowing tablet screen showing a digital guide or premium workbook interface, surrounded by abstract gradient light effects in deep indigo and coral. Futuristic, editorial, inspiring. Digital product e-commerce aesthetic." width="560" height="310" src="/assets/site-features-showcase-image-3.webp" alt="Creator toolkit and premium workbook on glowing tablet screen">
+            <div class="fss-tile-badge fss-tile-badge--light">
+              <span class="fss-badge-label">Creator Toolkits</span>
+            </div>
+            <div class="fss-tile-caption fss-tile-caption--small">
+              <h3 class="fss-tile-title fss-tile-title--small">Everything a Creator<br>Needs to Ship</h3>
+              <p class="fss-tile-desc fss-tile-desc--small">Online guides, premium workbooks, and creator toolkits engineered for the next-generation digital operator.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- /tile-stack -->
+
+    </div>
+    <!-- /collage -->
+
+    <!-- Bottom CTA row -->
+    <div class="fss-cta-row">
+      <div class="fss-cta-text">
+        <p class="fss-cta-label">Explore the full range of product directions across planning, strategy, and creation.</p>
+      </div>
+      <a href="/contact" class="fss-btn-primary">Start Your Digital Reset <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    </div>
+
+  </div>
+  <!-- /container -->
+
+  <!-- Decorative wireframe globe motif -->
+  <div class="fss-globe-motif" aria-hidden="true">
+    <svg data-no-icon-edit="true" aria-hidden="true" viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg" width="260" height="260">
+      <circle cx="130" cy="130" r="120" stroke="currentColor" stroke-width="1"></circle>
+      <ellipse cx="130" cy="130" rx="70" ry="120" stroke="currentColor" stroke-width="0.8"></ellipse>
+      <ellipse cx="130" cy="130" rx="120" ry="50" stroke="currentColor" stroke-width="0.8"></ellipse>
+      <ellipse cx="130" cy="130" rx="120" ry="90" stroke="currentColor" stroke-width="0.6"></ellipse>
+      <line x1="10" y1="130" x2="250" y2="130" stroke="currentColor" stroke-width="0.7"></line>
+      <line x1="130" y1="10" x2="130" y2="250" stroke="currentColor" stroke-width="0.7"></line>
+    </svg>
+  </div>
+
+</section>
+
+<section class="features-faq-section" data-layout-spec="Features-faq">
+  <div class="features-faq-container">
+    <div class="features-faq-header">
+      <span class="features-faq-label">Got Questions?</span>
+      <h2 class="features-faq-title">Everything You Need to Know</h2>
+      <p class="features-faq-subtitle">Clear answers for ambitious operators ready to build leverage through premium digital products.</p>
+    </div>
+
+    <div class="features-faq-list">
+
+      <article class="features-faq-item">
+        <div class="features-faq-question-row">
+          <span class="features-faq-number">01</span>
+          <h3 class="features-faq-question">What kinds of digital products work best with this model?</h3>
+        </div>
+        <div class="features-faq-answer">
+          <p>The Digital Reset is built for downloadable and instantly deliverable assets — think templates, frameworks, toolkits, guides, courses, and system blueprints. If you can package expertise or a repeatable process into a file or online experience, it fits. The model rewards products that solve a specific, high-value problem: Notion dashboards, Shopify ecommerce store setups, brand kits, content calendars, and financial trackers are all strong examples. The common thread is clarity — a buyer should understand the outcome within seconds of landing on your product page.</p>
+        </div>
+      </article>
+
+      <div class="features-faq-divider"></div>
+
+      <article class="features-faq-item">
+        <div class="features-faq-question-row">
+          <span class="features-faq-number">02</span>
+          <h3 class="features-faq-question">Who is The Digital Reset actually built for?</h3>
+        </div>
+        <div class="features-faq-answer">
+          <p>This brand is for online operators who are done with the noise and ready to build something with staying power. Freelancers packaging their knowledge into scalable products. Creators moving beyond sponsorships into owned revenue. Entrepreneurs launching their first shopify ecommerce website or expanding an existing catalog with digital goods. If you value quality over volume and want your work to reflect a premium standard, you'll feel at home here. We're not for everyone — and that's the point.</p>
+        </div>
+      </article>
+
+      <div class="features-faq-divider"></div>
+
+      <article class="features-faq-item">
+        <div class="features-faq-question-row">
+          <span class="features-faq-number">03</span>
+          <h3 class="features-faq-question">Why does premium positioning matter for digital products?</h3>
+        </div>
+        <div class="features-faq-answer">
+          <p>Pricing signals value before a buyer reads a single word. When your product is positioned at a premium — through design, copy, and the experience of purchasing — it attracts customers who are serious, take action, and rarely request refunds. Commodity pricing races to the bottom and erodes trust. Premium positioning creates a perception of authority that compounds over time: buyers share what they're proud of, reviews reflect satisfaction, and your brand becomes a reference point rather than a footnote. The margin difference also gives you room to invest in better products and better marketing.</p>
+        </div>
+      </article>
+
+      <div class="features-faq-divider"></div>
+
+      <article class="features-faq-item">
+        <div class="features-faq-question-row">
+          <span class="features-faq-number">04</span>
+          <h3 class="features-faq-question">How do static digital assets create recurring leverage?</h3>
+        </div>
+        <div class="features-faq-answer">
+          <p>A static digital asset — once created — can be sold an unlimited number of times with zero marginal cost. There's no inventory, no ecommerce fulfillment services to coordinate, no shipping delays. Every sale after the first is nearly pure margin. Over time, a small catalog of well-positioned products becomes a compounding asset: evergreen search traffic, affiliate partners, and returning customers all feed the same files. This is the core of leverage — your time investment is fixed, but your revenue potential is uncapped. One strong product can fund the next, creating a flywheel that grows while you sleep.</p>
+        </div>
+      </article>
+
+      <div class="features-faq-divider"></div>
+
+      <article class="features-faq-item">
+        <div class="features-faq-question-row">
+          <span class="features-faq-number">05</span>
+          <h3 class="features-faq-question">Do I need a large audience to start selling digital products?</h3>
+        </div>
+        <div class="features-faq-answer">
+          <p>No — and this is one of the most liberating truths about the digital product model. A small, engaged audience consistently outperforms a large, disengaged one. What matters more than follower count is the specificity of your product and the clarity of your positioning. Niche products with a clear promise convert at far higher rates than broad offerings chasing everyone. Many successful operators have launched their first product to fewer than 500 people and generated meaningful revenue in the first week. The foundation is trust and relevance, not reach — and both can be built intentionally from day one.</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+  </main>
+  
+  <footer class="site-footer" aria-label="Site Footer"><div class="footer-container"><div class="footer-top"><div class="footer-col footer-brand"><img src="/assets/the-digital-reset-e-commerce-logo.webp" alt="The Digital Reset" class="logo" /><p class="footer-tagline">Clarity, momentum, and premium digital tools for ambitious online operators. Reset your digital future — today.</p><div class="footer-badges"><span class="badge"><i class="fas fa-shipping-fast"></i> Free Shipping</span><span class="badge"><i class="fas fa-headset"></i> 24/7 Support</span></div></div><div class="footer-col footer-links"><h3 class="footer-heading">Quick Links</h3><ul class="footer-nav"><li><a href="/">Home</a></li><li><a href="/features">Features</a></li><li><a href="/about">About</a></li><li><a href="/contact">Contact</a></li></ul></div><div class="footer-col footer-contact-col"><h3 class="footer-heading">Contact Us</h3><ul class="footer-contact"><li><span class="contact-icon"><i class="fas fa-envelope"></i></span><span class="contact-text"><a href="mailto:[business_email]">[business_email]</a></span></li><li><span class="contact-icon"><i class="fas fa-phone"></i></span><span class="contact-text"><a href="tel:[business_phone]">[business_phone]</a></span></li><li><a href="/"><span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span><span class="contact-text">[business_address]</span></a></li></ul></div><div class="footer-col footer-social-col"><h3 class="footer-heading">Follow Us</h3><div class="footer-social"></div><div class="footer-hours"><h4 class="footer-subheading">Business Hours</h4><p>Mon–Fri: 9:00 AM – 6:00 PM</p><p>Sat: 10:00 AM – 4:00 PM</p><p>Sun: Closed</p></div></div></div><div class="footer-divider"></div><div class="footer-bottom"><p class="footer-copyright">© 2026 The Digital Reset. All rights reserved.</p><div class="footer-legal"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms &amp; Conditions</a><span class="separator">|</span>
+            <a href="/return-policy" aria-label="Return Policy">
+              Return Policy
+            </a><a href="/accessibility">Accessibility</a><a href="https://zappy5.com" target="_blank" class="zappy-attribution">Generated by Zappy</a></div></div></div></footer>
+  
+  <a href="https://wa.me/[whatsapp_handle]" class="whatsapp-float" aria-label="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+  
+  <div data-integration="accessibility:toolbar"></div>
+
+    <script src="/script.js"></script>
+
+    <script id="zappy-mobile-submenu-script">
+    (function() {
+      function initMobileSubmenuToggles() {
+        if (window.innerWidth > 768) {
+          document.querySelectorAll('.mobile-submenu-toggle').forEach(function(btn) { btn.remove(); });
+          document.querySelectorAll('.sub-menu.mobile-expanded').forEach(function(menu) { menu.classList.remove('mobile-expanded'); });
+          return;
+        }
+        var items = document.querySelectorAll('.nav-menu li:has(.sub-menu), nav li:has(.sub-menu), .navbar li:has(.sub-menu), #navMenu li:has(.sub-menu)');
+        items.forEach(function(li) {
+          if (li.querySelector('.mobile-submenu-toggle')) return;
+          var submenu = li.querySelector('.sub-menu');
+          var parentLink = li.querySelector(':scope > a');
+          if (!submenu || !parentLink) return;
+          var toggleBtn = document.createElement('button');
+          toggleBtn.className = 'mobile-submenu-toggle';
+          toggleBtn.setAttribute('aria-label', 'Toggle submenu');
+          toggleBtn.setAttribute('type', 'button');
+          parentLink.insertAdjacentElement('afterend', toggleBtn);
+          toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            document.querySelectorAll('.sub-menu.mobile-expanded').forEach(function(menu) {
+              if (menu !== submenu) { menu.classList.remove('mobile-expanded'); var t = menu.parentElement.querySelector('.mobile-submenu-toggle'); if(t) t.classList.remove('expanded'); }
+            });
+            submenu.classList.toggle('mobile-expanded');
+            toggleBtn.classList.toggle('expanded');
+          });
+        });
+      }
+      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMobileSubmenuToggles); }
+      else { initMobileSubmenuToggles(); }
+      var resizeTimer; window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(initMobileSubmenuToggles, 250); });
+      // Re-initialize when mobile menu becomes visible (MutationObserver)
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes') {
+            var target = mutation.target;
+            if (target.classList && (target.classList.contains('active') || target.classList.contains('open'))) {
+              setTimeout(initMobileSubmenuToggles, 100);
+            }
+          }
+        });
+      });
+      setTimeout(function() {
+        document.querySelectorAll('.mobile-menu, .nav-menu, #navMenu, nav').forEach(function(menu) {
+          observer.observe(menu, { attributes: true, attributeFilter: ['class', 'style'] });
+        });
+      }, 500);
+    })();
+    </script>
+
+    <script id="zappy-navbar-scroll-effect">
+    (function(){
+      var nb=document.querySelector('nav.navbar,.navbar:not(.zappy-catalog-menu)');
+      var cm=document.querySelector('.zappy-catalog-menu,#zappy-catalog-menu');
+      if(!nb)return;
+      var fb='rgba(238,241,255,0.85)';
+      var th=60;
+      var rs=getComputedStyle(document.documentElement);
+      var td=rs.getPropertyValue('--text-dark').trim()||'#1a1a1a';
+      var tl=rs.getPropertyValue('--text-light').trim()||'#ffffff';
+      var st=true?td:tl;
+      nb.style.transition='background 0.3s ease,backdrop-filter 0.3s ease,-webkit-backdrop-filter 0.3s ease,box-shadow 0.3s ease';
+      if(cm)cm.style.transition='background 0.3s ease,backdrop-filter 0.3s ease,-webkit-backdrop-filter 0.3s ease';
+      var neSel='a,.navbar-brand,.navbar-brand a,.dropdown-toggle,.mobile-toggle,.phone-header-btn,.mobile-hamburger-btn,.mobile-close-btn,.mobile-submenu-toggle,.nav-link';
+      var skipCls=['cart-link','login-link','nav-search-toggle','search-toggle'];
+      function sTC(c,clr){var els=c.querySelectorAll(neSel);for(var i=0;i<els.length;i++){var sk=false;if(els[i].closest('.sub-menu')||els[i].closest('.dropdown-menu')){sk=true;}for(var j=0;j<skipCls.length;j++){if(els[i].classList.contains(skipCls[j])){sk=true;break;}}if(!sk)els[i].style.setProperty('color',clr,'important');}}
+      function cTC(c){var els=c.querySelectorAll(neSel);for(var i=0;i<els.length;i++){if(els[i].closest('.sub-menu')||els[i].closest('.dropdown-menu'))continue;els[i].style.removeProperty('color');}}
+      function applyScrolled(){
+        nb.classList.add('scrolled');
+        if(window.innerWidth>768){
+          nb.style.setProperty('--frosted-text',st);
+          nb.style.setProperty('background-image','none','important');
+          nb.style.setProperty('background-color',fb,'important');
+          nb.style.backdropFilter='blur(12px)';nb.style.webkitBackdropFilter='blur(12px)';nb.style.boxShadow='0 2px 16px rgba(0,0,0,0.12)';
+          sTC(nb,st);
+        }
+        if(cm){cm.classList.add('scrolled');if(window.innerWidth>768){cm.style.setProperty('background',fb,'important');cm.style.setProperty('backdrop-filter','blur(12px)','important');cm.style.setProperty('-webkit-backdrop-filter','blur(12px)','important');sTC(cm,st);}}
+      }
+      function onS(){
+        if(window._zappyNavNoDarkHero) return;
+        if(window.innerWidth<=768){nb.classList.remove('scrolled');cTC(nb);if(cm){cm.classList.remove('scrolled');cTC(cm);}return;}
+        var y=window.scrollY||window.pageYOffset;
+        if(y>th){
+          nb.classList.add('scrolled');nb.style.setProperty('background-color',fb,'important');nb.style.setProperty('background-image','none','important');
+          nb.style.setProperty('--frosted-text',st);nb.style.backdropFilter='blur(12px)';nb.style.webkitBackdropFilter='blur(12px)';nb.style.boxShadow='0 2px 16px rgba(0,0,0,0.12)';
+          sTC(nb,st);
+          if(cm){cm.classList.add('scrolled');cm.style.setProperty('background',fb,'important');cm.style.setProperty('backdrop-filter','blur(12px)','important');cm.style.setProperty('-webkit-backdrop-filter','blur(12px)','important');sTC(cm,st);}
+        }else{
+          nb.classList.remove('scrolled');nb.style.setProperty('background-color','transparent','important');nb.style.removeProperty('background-image');
+          nb.style.removeProperty('--frosted-text');nb.style.backdropFilter='none';nb.style.webkitBackdropFilter='none';nb.style.boxShadow='none';
+          cTC(nb);
+          if(cm){cm.classList.remove('scrolled');cm.style.setProperty('background','transparent','important');cm.style.setProperty('backdrop-filter','none','important');cm.style.setProperty('-webkit-backdrop-filter','none','important');cTC(cm);}
+        }
+      }
+      function sLum(rv,gv,bv){rv/=255;gv/=255;bv/=255;rv=rv<=0.03928?rv/12.92:Math.pow((rv+0.055)/1.055,2.4);gv=gv<=0.03928?gv/12.92:Math.pow((gv+0.055)/1.055,2.4);bv=bv<=0.03928?bv/12.92:Math.pow((bv+0.055)/1.055,2.4);return 0.2126*rv+0.7152*gv+0.0722*bv;}
+      window.addEventListener('scroll',onS,{passive:true});
+      window.addEventListener('resize',onS,{passive:true});
+      onS();
+      var heroEl=document.querySelector('section[class*="hero"],[data-hero-type],main:not(.courses-page-main)>section:first-child');
+      var hasDH=false;
+      if(heroEl){var hCs=getComputedStyle(heroEl);var hBI=hCs.backgroundImage;if(hBI&&hBI!=='none'){if(hBI.indexOf('url(')!==-1){var hM2=hCs.backgroundColor.match(/\d+/g);if(hM2&&hM2.length>=3){hasDH=sLum(parseInt(hM2[0]),parseInt(hM2[1]),parseInt(hM2[2]))<0.4;}else{hasDH=true;}}else if(hBI.indexOf('gradient')!==-1){var cM=hBI.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g);if(cM&&cM.length>0){var tLm=0;for(var ci=0;ci<cM.length;ci++){var pts=cM[ci].match(/\d+/g);tLm+=sLum(parseInt(pts[0]),parseInt(pts[1]),parseInt(pts[2]));}hasDH=(tLm/cM.length)<0.4;}else{hasDH=true;}}else{hasDH=true;}}else{var hM=hCs.backgroundColor.match(/\d+/g);if(hM&&hM.length>=3){hasDH=sLum(parseInt(hM[0]),parseInt(hM[1]),parseInt(hM[2]))<0.4;}}}
+      if(!hasDH){window.removeEventListener('scroll',onS);window.removeEventListener('resize',onS);applyScrolled();window._zappyNavNoDarkHero=true;}
+    })();
+    </script>
+</body>
+</html>
